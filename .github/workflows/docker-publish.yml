@@ -70,8 +70,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64
-          # For old raspberry pi : linux/arm64/v8,linux/arm/v7
+          platforms: linux/arm64/v8,linux/amd64
+          # For old raspberry pi : linux/arm/v7
 
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
