@@ -1,5 +1,10 @@
-# Utiliser une image Node.js compatible ARM64
 FROM node:18-bullseye AS build
+
+ARG NEXTAUTH_SECRET="s3hZEw5YsmZixzmAC9UWat9sVLQUiBCiKEJK"
+ARG DATABASE_URL="postgresql://cal:s5vFyESc@cal-db:5432/caldb"
+
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+ENV DATABASE_URL=$DATABASE_URL
 
 # Définition des variables d'environnement
 ENV NEXT_TELEMETRY_DISABLED 1
