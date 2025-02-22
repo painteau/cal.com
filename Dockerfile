@@ -1,35 +1,45 @@
 FROM node:18-bullseye AS build
 
-ARG NEXTAUTH_SECRET="s3hZEw5YsmZixzmAC9UWat9sVLQUiBCiKEJK"
-ARG DATABASE_URL="postgresql://cal:s5vFyESc@cal-db:5432/caldb"
+ARG NEXTAUTH_SECRET
+ARG DATABASE_URL
 
 ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
 ENV DATABASE_URL=$DATABASE_URL
 
-# Définition des variables d'environnement
+# Disable Next.js telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
+
 WORKDIR /app
 
-# Cloner le dépôt de Cal.com
+# Clone Cal.com repository
 RUN git clone --depth 1 https://github.com/calcom/cal.com.git .
 
-# Installer les dépendances
-RUN corepack enable && yarn install --frozen-lockfile
-
-# Construire l'application
-RUN yarn build
+# Install dependencies and build
+RUN corepack enable && \
+    yarn install --frozen-lockfile && \
+    yarn build
 
 # Production image
-FROM node:18-bullseye
+FROM node:18-bullseye-slim
 
 WORKDIR /app
+
+# Copy built application
 COPY --from=build /app /app
 
-# Installer les dépendances runtime
-RUN corepack enable && yarn install --production
+# Install production dependencies only
+RUN corepack enable && \
+    yarn install --production --frozen-lockfile && \
+    yarn cache clean
 
-# Exposer le port
+# Create a non-root user
+RUN useradd -m calcom && \
+    chown -R calcom:calcom /app
+
+USER calcom
+
+# Expose application port
 EXPOSE 3000
 
-# Commande de démarrage
+# Start the application
 CMD ["yarn", "start"]
